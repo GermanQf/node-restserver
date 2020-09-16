@@ -7,14 +7,22 @@ const _ = require('underscore');
 //encriptar la contraseña
 
 const bcrypt = require('bcrypt');
-const usuario = require('../modelos/usuario');
-const { response } = require('express');
+
+const {verificaToken, verificaAdminRole } = require('../middlewares/autenticacion')
 
 const app = express()
 
-app.get('/usuario', function (req, res) {
+app.get('/usuario',verificaToken ,function (req, res) {
     //res.json('getUsuariosss'); //se envia en json
 
+
+    //retornar controlado
+
+   /* return res.json ({
+        usuario: req.usuario,
+        nombre: req.usuario.nombre,
+        email: req.usuario.email
+    })*/
     let desde = Number(req.query.desde) || 0; //supong que viene, sino voy desde la pag 0
     let limite = Number(req.query.limite) || 5;
 
@@ -50,7 +58,7 @@ app.get('/usuario', function (req, res) {
 
   });
   
-  app.post('/usuario', function (req, res) {
+  app.post('/usuario',[verificaToken,verificaAdminRole], function (req, res) {
   
       let body = req.body;
     
@@ -104,7 +112,8 @@ app.get('/usuario', function (req, res) {
       
     });
   
-  app.put('/usuario/:id', function (req, res) {
+    //se mandan dos middlewares, uno vara verificar token y otro para el rol
+  app.put('/usuario/:id', [verificaToken,verificaAdminRole],function (req, res) {
       let id = req.params.id;
       let body = _.pick(req.body,['nombre','email','img','role','estado']) ;
 
@@ -128,7 +137,7 @@ app.get('/usuario', function (req, res) {
     });
     
   
-  app.delete('/usuario/:id', function (req, res) {
+  app.delete('/usuario/:id', [verificaToken,verificaAdminRole],function (req, res) {
   //res.json('delete usuario'); //se envia en json
 
   let id = req.params.id;
